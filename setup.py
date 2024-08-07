@@ -17,7 +17,7 @@ with open("README.md", encoding="utf-8", errors="replace") as fh:
 
 setuptools.setup(
     name="deeplabcut",
-    version="2.3.9",
+    version="2.3.10",
     author="A. & M.W. Mathis Labs",
     author_email="alexander@deeplabcut.org",
     description="Markerless pose-estimation of user-defined features with deep learning",
@@ -31,7 +31,7 @@ setuptools.setup(
         "imgaug>=0.4.0",
         "imageio-ffmpeg",
         "numba>=0.54",
-        "matplotlib>=3.3,!=3.7.0,!=3.7.1",
+        "matplotlib>=3.3,<3.9,!=3.7.0,!=3.7.1",
         "networkx>=2.6",
         "numpy>=1.18.5",
         "pandas>=1.0.1,!=1.5.0",
