@@ -14,6 +14,9 @@ class DLCParams:
         "avi",
         "mp4",
         "mov",
+        "mkv",
+        "MOV",
+        "mov",
     ]
 
     NNETS = [
