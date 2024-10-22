@@ -72,7 +72,7 @@ setuptools.setup(
         "scikit-learn>=1.0",
         "scipy>=1.4,<1.11.0",
         "statsmodels>=0.11",
-        "tables==3.8.0",
+        "tables",
         "timm",
         "torch>=2.0.0",
         "torchvision",
