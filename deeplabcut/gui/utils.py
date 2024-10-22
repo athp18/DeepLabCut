@@ -39,6 +39,8 @@ def move_to_separate_thread(func):
 
 
 def is_latest_deeplabcut_version():
+    return True,"2.3.10"
+    """
     import json
     import urllib.request
     from deeplabcut import VERSION
@@ -47,3 +49,4 @@ def is_latest_deeplabcut_version():
     contents = urllib.request.urlopen(url).read()
     latest_version = json.loads(contents)["info"]["version"]
     return VERSION == latest_version, latest_version
+    """
