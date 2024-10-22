@@ -31,7 +31,7 @@ import warnings
 
 
 # more videos are in principle covered, as OpenCV is used and allows many formats.
-SUPPORTED_VIDEOS = "avi", "mp4", "mov", "mpeg", "mpg", "mpv", "mkv", "flv", "qt", "yuv"
+SUPPORTED_VIDEOS = "avi", "mp4", "mov", "mpeg", "mpg", "mpv", "mkv", "flv", "qt", "yuv", "AVI", "MP4", "MOV", "MPEG", "MPG", "MPV", "MKV", "FLV", "QT", "YUV"
 
 
 class VideoReader:
