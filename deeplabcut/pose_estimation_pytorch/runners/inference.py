@@ -80,8 +80,10 @@ class InferenceRunner(Runner, Generic[ModelType], metaclass=ABCMeta):
     @torch.no_grad()
     def inference(
         self,
-        images: Iterable[str | np.ndarray]
-        | Iterable[tuple[str | np.ndarray, dict[str, Any]]],
+        images: (
+            Iterable[str | np.ndarray]
+            | Iterable[tuple[str | np.ndarray, dict[str, Any]]]
+        ),
     ) -> list[dict[str, np.ndarray]]:
         """Run model inference on the given dataset
 
@@ -117,7 +119,8 @@ class InferenceRunner(Runner, Generic[ModelType], metaclass=ABCMeta):
         return results
 
     def _prepare_inputs(
-        self, data: str | np.ndarray | tuple[str | np.ndarray, dict],
+        self,
+        data: str | np.ndarray | tuple[str | np.ndarray, dict],
     ) -> None:
         """
         Prepares inputs for an image and adds them to the data ready to be processed
@@ -177,14 +180,14 @@ class InferenceRunner(Runner, Generic[ModelType], metaclass=ABCMeta):
         Processes a batch. There must be inputs waiting to be processed before this is
         called, otherwise this method will raise an error.
         """
-        batch = self._batch[:self.batch_size]
+        batch = self._batch[: self.batch_size]
         self._predictions += self.predict(batch)
 
         # remove processed inputs from batch
         if len(self._batch) <= self.batch_size:
             self._batch = None
         else:
-            self._batch = self._batch[self.batch_size:]
+            self._batch = self._batch[self.batch_size :]
 
     def _inputs_waiting_for_processing(self) -> bool:
         """Returns: Whether there are inputs which have not yet been processed"""
@@ -256,14 +259,8 @@ class DetectorInferenceRunner(InferenceRunner[BaseDetector]):
         predictions = [
             {
                 "detection": {
-                    "bboxes": item["boxes"]
-                    .cpu()
-                    .numpy()
-                    .reshape(-1, 4),
-                    "scores": item["scores"]
-                    .cpu()
-                    .numpy()
-                    .reshape(-1),
+                    "bboxes": item["boxes"].cpu().numpy().reshape(-1, 4),
+                    "scores": item["scores"].cpu().numpy().reshape(-1),
                 }
             }
             for item in raw_predictions

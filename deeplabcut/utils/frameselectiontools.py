@@ -28,6 +28,7 @@ from sklearn.cluster import MiniBatchKMeans
 from sklearn.mixture import GaussianMixture
 from tqdm import tqdm
 
+
 def GMMbasedFrameselection(
     clip,
     numframes2pick,
@@ -142,6 +143,7 @@ def GMMbasedFrameselection(
     del clipresized
     return frames2pick
 
+
 def GMMbasedFrameselectioncv2(
     cap,
     numframes2pick,
@@ -236,9 +238,7 @@ def GMMbasedFrameselectioncv2(
         ret, frame = cap.read()
         if not ret:
             continue
-        frame_resized = cv2.resize(
-            frame, (nx, ny), interpolation=cv2.INTER_AREA
-        )
+        frame_resized = cv2.resize(frame, (nx, ny), interpolation=cv2.INTER_AREA)
         if color:
             DATA[counter, :] = frame_resized.reshape(-1)
         else:
@@ -260,6 +260,7 @@ def GMMbasedFrameselectioncv2(
             frames2pick.append(Index[selected_index])
 
     return frames2pick
+
 
 def EMFrameSelection(
     cap,
@@ -359,9 +360,7 @@ def EMFrameSelection(
         ret, frame = cap.read()
         if not ret:
             continue
-        frame_resized = cv2.resize(
-            frame, (nx, ny), interpolation=cv2.INTER_AREA
-        )
+        frame_resized = cv2.resize(frame, (nx, ny), interpolation=cv2.INTER_AREA)
         if color:
             DATA[counter, :] = frame_resized.flatten()
         else:
@@ -377,7 +376,9 @@ def EMFrameSelection(
     em = cv2.ml.EM_create()
     em.setClustersNumber(numframes2pick)
     em.setCovarianceMatrixType(cov_mat_type)
-    em.setTermCriteria((cv2.TERM_CRITERIA_MAX_ITER + cv2.TERM_CRITERIA_EPS, max_iter, 1e-6))
+    em.setTermCriteria(
+        (cv2.TERM_CRITERIA_MAX_ITER + cv2.TERM_CRITERIA_EPS, max_iter, 1e-6)
+    )
 
     # Train EM model
     retval, logLikelihoods, labels, probs = em.trainEM(DATA)
@@ -391,6 +392,7 @@ def EMFrameSelection(
             frames2pick.append(Index[selected_index])
 
     return frames2pick
+
 
 def UniformFrames(clip, numframes2pick, start, stop, Index=None):
     """Temporally uniformly sampling frames in interval (start,stop).

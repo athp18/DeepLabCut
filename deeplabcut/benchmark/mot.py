@@ -85,7 +85,9 @@ def compute_mot_metrics(
     trackers_gt = func(df_gt, **kwargs)
     trackers = func(df, **kwargs)
     return _compute_mot_metrics(
-        trackers_gt, trackers, tracker_type,
+        trackers_gt,
+        trackers,
+        tracker_type,
     )
 
 

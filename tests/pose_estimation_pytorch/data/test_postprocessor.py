@@ -87,7 +87,10 @@ def test_trim_outputs(data):
     """expects x_processed = x * scale + offset"""
     postprocessor = TrimOutputs(max_individuals=data["max_individuals"])
     context = {}
-    predictions = {"bboxes": np.array(data["bboxes"]), "bbox_scores": np.array(data["bbox_scores"])}
+    predictions = {
+        "bboxes": np.array(data["bboxes"]),
+        "bbox_scores": np.array(data["bbox_scores"]),
+    }
     predictions, context = postprocessor(predictions, context=context)
     print(predictions["bboxes"].tolist())
     print(predictions["bbox_scores"].tolist())

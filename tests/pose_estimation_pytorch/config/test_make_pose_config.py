@@ -11,7 +11,9 @@
 """Tests the pre-processors"""
 import pytest
 
-from deeplabcut.pose_estimation_pytorch.config.make_pose_config import make_pytorch_pose_config
+from deeplabcut.pose_estimation_pytorch.config.make_pose_config import (
+    make_pytorch_pose_config,
+)
 from deeplabcut.pose_estimation_pytorch.config.utils import pretty_print, update_config
 
 
@@ -88,9 +90,7 @@ def test_backbone_plus_paf_config(
     pretty_print(pytorch_pose_config)
 
     graph = [
-        [i, j]
-        for i in range(len(bodyparts))
-        for j in range(i + 1, len(bodyparts))
+        [i, j] for i in range(len(bodyparts)) for j in range(i + 1, len(bodyparts))
     ]
     num_limbs = len(graph) * 2
 
@@ -105,7 +105,7 @@ def test_backbone_plus_paf_config(
     for name, output_channels in [
         ("heatmap_config", len(bodyparts)),
         ("locref_config", len(bodyparts) * 2),
-        ("paf_config", num_limbs)
+        ("paf_config", num_limbs),
     ]:
         print(name, bodypart_head[name]["channels"])
         assert name in bodypart_head
@@ -138,7 +138,7 @@ def test_backbone_plus_paf_config(
         ("ssdlite", "SSDLite"),
         ("fasterrcnn_mobilenet_v3_large_fpn", "FasterRCNN"),
         ("fasterrcnn_resnet50_fpn_v2", "FasterRCNN"),
-    ]
+    ],
 )
 @pytest.mark.parametrize("individuals", [["single"], ["bugs", "daffy"]])
 @pytest.mark.parametrize("bodyparts", [["nose"], ["nose", "ear", "eye"]])
@@ -211,7 +211,7 @@ def test_make_dekr_config(
         identity=identity,
         individuals=individuals,
         bodyparts=bodyparts,
-        unique_bodyparts=unique_bodyparts
+        unique_bodyparts=unique_bodyparts,
     )
     pytorch_pose_config = make_pytorch_pose_config(
         project_config,
@@ -271,7 +271,7 @@ def test_make_dlcrnet_config(
         identity=identity,
         individuals=individuals,
         bodyparts=bodyparts,
-        unique_bodyparts=unique_bodyparts
+        unique_bodyparts=unique_bodyparts,
     )
     pytorch_pose_config = make_pytorch_pose_config(
         project_config,
@@ -280,9 +280,7 @@ def test_make_dlcrnet_config(
     )
     pretty_print(pytorch_pose_config)
     paf_graph = [
-        [i, j]
-        for i in range(len(bodyparts))
-        for j in range(i + 1, len(bodyparts))
+        [i, j] for i in range(len(bodyparts)) for j in range(i + 1, len(bodyparts))
     ]
     num_limbs = len(paf_graph)
 
@@ -336,7 +334,7 @@ def test_make_tokenpose_config(
         identity=identity,
         individuals=individuals,
         bodyparts=bodyparts,
-        unique_bodyparts=unique_bodyparts
+        unique_bodyparts=unique_bodyparts,
     )
 
     if identity or len(unique_bodyparts) > 0:
@@ -365,28 +363,37 @@ def test_make_tokenpose_config(
         assert "data" in pytorch_pose_config["detector"]
 
 
-@pytest.mark.parametrize("data", [
-    {
-        "config": {"a": 0, "b": 0},
-        "updates": {"b": 1},
-        "expected_result": {"a": 0, "b": 1},
-    },
-    {
-        "config": {"a": 0, "b": {"i0": 1, "i1": 2}},
-        "updates": {"b": 1},
-        "expected_result": {"a": 0, "b": 1},
-    },
-    {
-        "config": {"a": 0, "b": {"i0": 1, "i1": 2}},
-        "updates": {"b": {"i0": [1, 2, 3]}},
-        "expected_result": {"a": 0, "b": {"i0": [1, 2, 3], "i1": 2}},
-    },
-    {
-        "config": {"detector": {"batch_size": 1, "epochs": 10, "save_epochs": 5}},
-        "updates": {"batch_size": 1, "detector": {"batch_size": 8, "save_epochs": 1}},
-        "expected_result": {"batch_size": 1, "detector": {"batch_size": 8, "epochs": 10, "save_epochs": 1}},
-    },
-])
+@pytest.mark.parametrize(
+    "data",
+    [
+        {
+            "config": {"a": 0, "b": 0},
+            "updates": {"b": 1},
+            "expected_result": {"a": 0, "b": 1},
+        },
+        {
+            "config": {"a": 0, "b": {"i0": 1, "i1": 2}},
+            "updates": {"b": 1},
+            "expected_result": {"a": 0, "b": 1},
+        },
+        {
+            "config": {"a": 0, "b": {"i0": 1, "i1": 2}},
+            "updates": {"b": {"i0": [1, 2, 3]}},
+            "expected_result": {"a": 0, "b": {"i0": [1, 2, 3], "i1": 2}},
+        },
+        {
+            "config": {"detector": {"batch_size": 1, "epochs": 10, "save_epochs": 5}},
+            "updates": {
+                "batch_size": 1,
+                "detector": {"batch_size": 8, "save_epochs": 1},
+            },
+            "expected_result": {
+                "batch_size": 1,
+                "detector": {"batch_size": 8, "epochs": 10, "save_epochs": 1},
+            },
+        },
+    ],
+)
 def test_update_config(data: dict):
     result = update_config(config=data["config"], updates=data["updates"])
     print("\nResult")

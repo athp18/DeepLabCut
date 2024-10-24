@@ -45,7 +45,10 @@ class VideoIterator(VideoReader):
     """A class to iterate over videos, with possible added context"""
 
     def __init__(
-        self, video_path: str | Path, context: list[dict[str, Any]] | None = None, cropping: list[int] | None = None
+        self,
+        video_path: str | Path,
+        context: list[dict[str, Any]] | None = None,
+        cropping: list[int] | None = None,
     ) -> None:
         super().__init__(str(video_path))
         self._context = context
@@ -267,7 +270,10 @@ def analyze_videos(
     pose_cfg = auxiliaryfunctions.read_plainconfig(pose_cfg_path)
 
     snapshot_index, detector_snapshot_index = parse_snapshot_index_for_analysis(
-        cfg, model_cfg, snapshot_index, detector_snapshot_index,
+        cfg,
+        model_cfg,
+        snapshot_index,
+        detector_snapshot_index,
     )
 
     if cropping is None and cfg.get("cropping", False):
@@ -471,7 +477,7 @@ def create_df_from_prediction(
         index=range(len(pred_bodyparts)),
     )
     if pred_unique_bodyparts is not None:
-        unique_columns = [dlc_scorer], ['single'], unique_bodyparts, coords
+        unique_columns = [dlc_scorer], ["single"], unique_bodyparts, coords
         df_u = pd.DataFrame(
             pred_unique_bodyparts.reshape((len(pred_unique_bodyparts), -1)),
             columns=pd.MultiIndex.from_product(unique_columns, names=cols_names),

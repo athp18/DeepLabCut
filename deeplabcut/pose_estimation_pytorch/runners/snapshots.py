@@ -68,6 +68,7 @@ class TorchSnapshotManager:
                 "optimizer": optimizer.state_dict()
             })
     """
+
     task: Task
     model_folder: Path
     key_metric: str | None = None
@@ -95,11 +96,17 @@ class TorchSnapshotManager:
         """
         metrics = state_dict["metadata"]["metrics"]
         if (
-            self.key_metric in metrics and
-            not np.isnan(metrics[self.key_metric]) and (
-                self._best_metric is None or
-                (self.key_metric_asc and self._best_metric < metrics[self.key_metric]) or
-                (not self.key_metric_asc and self._best_metric > metrics[self.key_metric])
+            self.key_metric in metrics
+            and not np.isnan(metrics[self.key_metric])
+            and (
+                self._best_metric is None
+                or (
+                    self.key_metric_asc and self._best_metric < metrics[self.key_metric]
+                )
+                or (
+                    not self.key_metric_asc
+                    and self._best_metric > metrics[self.key_metric]
+                )
             )
         ):
             print(f"Saving best snapshot at epoch={epoch}")
@@ -150,7 +157,8 @@ class TorchSnapshotManager:
         pattern = r"^(" + self.task.snapshot_prefix + r"-\d+\.pt)$"
         snapshots = [
             Snapshot(best=False, epochs=int(f.stem.split("-")[-1]), path=f)
-            for f in self.model_folder.iterdir() if re.match(pattern, f.name)
+            for f in self.model_folder.iterdir()
+            if re.match(pattern, f.name)
         ]
         snapshots.sort(key=lambda s: s.epochs)
 

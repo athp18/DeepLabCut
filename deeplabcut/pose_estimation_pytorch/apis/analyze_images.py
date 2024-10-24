@@ -95,10 +95,12 @@ def superanimal_analyze_images(
     out_folder.mkdir(exist_ok=True, parents=True)
 
     snapshot_path = modelzoo.get_super_animal_snapshot_path(
-        dataset=superanimal_name, model_name=model_name,
+        dataset=superanimal_name,
+        model_name=model_name,
     )
     detector_path = modelzoo.get_super_animal_snapshot_path(
-        dataset=superanimal_name, model_name=detector_name,
+        dataset=superanimal_name,
+        model_name=detector_name,
     )
 
     config = modelzoo.load_super_animal_config(

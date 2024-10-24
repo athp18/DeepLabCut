@@ -282,7 +282,7 @@ class TrimOutputs(Postprocessor):
         for name in predictions:
             output = predictions[name]
             if len(output) > self.max_individuals[name]:
-                predictions[name] = output[:self.max_individuals[name]]
+                predictions[name] = output[: self.max_individuals[name]]
 
         return predictions, context
 

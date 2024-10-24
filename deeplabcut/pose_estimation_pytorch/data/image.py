@@ -94,7 +94,7 @@ def resize_and_random_crop(
     else:
         h, w = get_resize_preserve_ratio(
             oh, ow, size[0], size[1], max_long_side=max_size
-            )
+        )
         tgt_h, tgt_w = size
 
     scale_x, scale_y = ow / w, oh / h
@@ -147,7 +147,9 @@ def resize_and_random_crop(
         if boxes is not None and len(boxes) > 0:
             scaled_boxes = (boxes / bbox_scale) - bbox_offset
             scaled_boxes = _compute_crop_bounds(
-                scaled_boxes, (tgt_h, tgt_w, 3), remove_empty=False,
+                scaled_boxes,
+                (tgt_h, tgt_w, 3),
+                remove_empty=False,
             )
             anns[bbox_key] = scaled_boxes
 

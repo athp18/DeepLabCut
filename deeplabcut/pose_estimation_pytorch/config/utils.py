@@ -59,6 +59,7 @@ def replace_default_values(
         ValueError: if there is a placeholder value who's "updated" value was not
             given to the method
     """
+
     def get_updated_value(variable: str) -> int | list[int]:
         var_parts = variable.strip().split(" ")
         var_name = var_parts[0]
@@ -198,7 +199,7 @@ def read_config_as_dict(config_path: str | Path) -> dict:
         The configuration file with pure Python classes
     """
     with open(config_path, "r") as f:
-        cfg = YAML(typ='safe', pure=True).load(f)
+        cfg = YAML(typ="safe", pure=True).load(f)
 
     return cfg
 

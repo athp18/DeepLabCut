@@ -17,7 +17,11 @@ import deeplabcut.utils.auxiliaryfunctions as af
 from deeplabcut.compat import Engine
 
 from utils import (
-    cleanup, create_fake_project, log_step, run, SyntheticProjectParameters,
+    cleanup,
+    create_fake_project,
+    log_step,
+    run,
+    SyntheticProjectParameters,
 )
 
 
@@ -63,7 +67,7 @@ def main(
                             snapshots=dict(
                                 save_epochs=save_epochs,
                                 max_snapshots=max_snapshots_to_keep,
-                            )
+                            ),
                         ),
                         detector=dict(
                             train_settings=dict(
@@ -76,7 +80,7 @@ def main(
                                     save_epochs=save_epochs,
                                     max_snapshots=max_snapshots_to_keep,
                                 )
-                            )
+                            ),
                         ),
                         logger=logger,
                     ),

@@ -222,7 +222,7 @@ def evaluate_snapshot(
     parameters = PoseDatasetParameters(
         bodyparts=project_bodyparts,
         unique_bpts=parameters.unique_bpts,
-        individuals=parameters.individuals
+        individuals=parameters.individuals,
     )
 
     predictions = {}

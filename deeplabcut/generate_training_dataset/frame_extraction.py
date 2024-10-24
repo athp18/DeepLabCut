@@ -398,7 +398,7 @@ def extract_frames(
                             resizewidth=cluster_resizewidth,
                             color=cluster_color,
                         )
-                elif algo == 'gmm' or algo == 'gaussian':
+                elif algo == "gmm" or algo == "gaussian":
                     if opencv:
                         frames2pick = frameselectiontools.GMMbasedFrameselectioncv2(
                             cap,
@@ -419,7 +419,7 @@ def extract_frames(
                             resizewidth=cluster_resizewidth,
                             color=cluster_color,
                         )
-                elif algo == 'em':
+                elif algo == "em":
                     frames2pick = frameselectiontools.EMFrameSelection(
                         cap,
                         numframes2pick,

@@ -319,7 +319,7 @@ def get_bodyparts(cfg: dict) -> typing.List[str]:
     return cfg["bodyparts"]
 
 
-def get_unique_bodyparts(cfg : dict) -> typing.List[str]:
+def get_unique_bodyparts(cfg: dict) -> typing.List[str]:
     """
     Args:
         cfg: a project configuration file
@@ -611,6 +611,7 @@ def get_evaluation_folder(
     """
     if engine is None:
         from deeplabcut.generate_training_dataset.metadata import get_shuffle_engine
+
         engine = get_shuffle_engine(
             cfg=cfg,
             trainingsetindex=cfg["TrainingFraction"].index(trainFraction),
@@ -712,6 +713,7 @@ def get_scorer_name(
     """
     if engine is None:
         from deeplabcut.generate_training_dataset.metadata import get_shuffle_engine
+
         engine = get_shuffle_engine(
             cfg=cfg,
             trainingsetindex=cfg["TrainingFraction"].index(trainFraction),
@@ -721,6 +723,7 @@ def get_scorer_name(
 
     if engine == Engine.PYTORCH:
         from deeplabcut.pose_estimation_pytorch.apis.utils import get_scorer_name
+
         snapshot_index = None
         if isinstance(trainingsiterations, int):
             snapshot_index = trainingsiterations
@@ -753,7 +756,11 @@ def get_scorer_name(
     dlc_cfg = read_plainconfig(
         os.path.join(
             cfg["project_path"],
-            str(get_model_folder(trainFraction, shuffle, cfg, engine=engine, modelprefix=modelprefix)),
+            str(
+                get_model_folder(
+                    trainFraction, shuffle, cfg, engine=engine, modelprefix=modelprefix
+                )
+            ),
             "train",
             engine.pose_cfg_name,
         )

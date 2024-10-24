@@ -52,7 +52,9 @@ def test_dlc_resize_pad_good_aspect_ratio(height, width, image_shapes):
     ],
 )
 def test_dlc_resize_pad_bad_aspect_ratio(data):
-    aug = transforms.KeepAspectRatioResize(width=data["width"], height=data["height"], mode="pad")
+    aug = transforms.KeepAspectRatioResize(
+        width=data["width"], height=data["height"], mode="pad"
+    )
     for in_shape, out_shape in zip(data["in_shapes"], data["out_shapes"]):
         fake_image = np.zeros(in_shape)
         transformed = aug(image=fake_image, keypoints=[])
@@ -81,7 +83,9 @@ def test_dlc_resize_pad_bad_aspect_ratio(data):
     ],
 )
 def test_dlc_resize_pad_bad_aspect_ratio_with_keypoints(data):
-    aug = transforms.KeepAspectRatioResize(width=data["width"], height=data["height"], mode="pad")
+    aug = transforms.KeepAspectRatioResize(
+        width=data["width"], height=data["height"], mode="pad"
+    )
     transform = A.Compose(
         [aug],
         keypoint_params=A.KeypointParams("xy", remove_invisible=False),

@@ -73,7 +73,9 @@ class COCOLoader(Loader):
                 bodyparts=bodyparts,
                 unique_bpts=[],
                 individuals=[f"individual{i}" for i in range(num_individuals)],
-                with_center_keypoints=self.model_cfg.get("with_center_keypoints", False),
+                with_center_keypoints=self.model_cfg.get(
+                    "with_center_keypoints", False
+                ),
                 color_mode=self.model_cfg.get("color_mode", "RGB"),
                 cropped_image_size=self.model_cfg.get("output_size", (256, 256)),
             )
@@ -255,15 +257,15 @@ class COCOLoader(Loader):
             annotations_per_image[image_id] = individual_idx + 1
 
         filter_annotations = []
-        for annotation in data['annotations']:
-            keypoints = annotation['keypoints']
-            bbox = annotation['bbox']
+        for annotation in data["annotations"]:
+            keypoints = annotation["keypoints"]
+            bbox = annotation["bbox"]
             if np.all(keypoints <= 0) or len(bbox) == 0:
                 continue
             filter_annotations.append(annotation)
 
-        data["annotations"] = filter_annotations        
-        
+        data["annotations"] = filter_annotations
+
         # FIXME: why estimating bbox when there are already bbox?
         annotations_with_bbox = self._compute_bboxes(
             data["images"],
