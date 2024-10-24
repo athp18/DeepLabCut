@@ -112,7 +112,7 @@ def extract_frames(
         you to delete the ``collectdata(.h5/.csv)`` files before labeling. Use with
         caution!
 
-    algo : string, Either ``"kmeans"`` or ``"uniform"`` or ``"gmm"``, Default: `"kmeans"`.
+    algo : string, Either ``"kmeans"`` or ``"uniform"`` or ``"gmm"`` or or ``"em"``, Default: `"kmeans"`.
         String specifying the algorithm to use for selecting the frames. This flag
         is only required for ``automatic`` mode and the default is ``kmeans``. For
         ``"uniform"``, frames are picked in temporally uniform way, ``"kmeans"``
