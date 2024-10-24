@@ -112,9 +112,8 @@ def extract_frames(
         you to delete the ``collectdata(.h5/.csv)`` files before labeling. Use with
         caution!
 
-    algo : string, Either ``"kmeans"`` or ``"uniform"``, Default: `"kmeans"`.
-        String specifying the algorithm to use for selecting the frames. Currently,
-        deeplabcut supports either ``kmeans`` or ``uniform`` based selection. This flag
+    algo : string, Either ``"kmeans"`` or ``"uniform"`` or ``"gmm"``, Default: `"kmeans"`.
+        String specifying the algorithm to use for selecting the frames. This flag
         is only required for ``automatic`` mode and the default is ``kmeans``. For
         ``"uniform"``, frames are picked in temporally uniform way, ``"kmeans"``
         performs clustering on downsampled frames (see user guide for details).
@@ -399,6 +398,37 @@ def extract_frames(
                             resizewidth=cluster_resizewidth,
                             color=cluster_color,
                         )
+                elif algo == 'gmm' or algo == 'gaussian':
+                    if opencv:
+                        frames2pick = frameselectiontools.GMMbasedFrameselectioncv2(
+                            cap,
+                            numframes2pick,
+                            start,
+                            stop,
+                            step=cluster_step,
+                            resizewidth=cluster_resizewidth,
+                            color=cluster_color,
+                        )
+                    else:
+                        frames2pick = frameselectiontools.GMMbasedFrameselection(
+                            clip,
+                            numframes2pick,
+                            start,
+                            stop,
+                            step=cluster_step,
+                            resizewidth=cluster_resizewidth,
+                            color=cluster_color,
+                        )
+                elif algo == 'em':
+                    frames2pick = frameselectiontools.EMFrameSelection(
+                        cap,
+                        numframes2pick,
+                        start,
+                        stop,
+                        step=cluster_step,
+                        resize_width=cluster_resizewidth,
+                        color=cluster_color,
+                    )
                 else:
                     print(
                         "Please implement this method yourself and send us a pull request! Otherwise, choose 'uniform' or 'kmeans'."

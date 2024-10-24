@@ -25,8 +25,372 @@ import cv2
 import numpy as np
 from skimage.util import img_as_ubyte
 from sklearn.cluster import MiniBatchKMeans
+from sklearn.mixture import GaussianMixture
 from tqdm import tqdm
 
+def GMMbasedFrameselection(
+    clip,
+    numframes2pick,
+    start,
+    stop,
+    Index=None,
+    step=1,
+    resizewidth=30,
+    max_iter=100,
+    color=False,
+):
+    """
+    This function selects frames from a video clip using Gaussian Mixture Model clustering.
+    Each frame is treated as a data point, and frames from different clusters are selected.
+    This ensures that the selected frames represent diverse visual content.
+
+    Parameters
+    ----------
+    clip : VideoFileClip object
+        The video clip from which to extract frames.
+
+    numframes2pick : int
+        The number of frames to select.
+
+    start : float
+        The starting fraction of the video duration (between 0 and 1).
+
+    stop : float
+        The ending fraction of the video duration (between 0 and 1).
+
+    Index : list or ndarray, optional
+        A list of frame indices to consider. If None, frames are sampled based on start and stop.
+
+    step : int, default=1
+        Step size for sampling frames.
+
+    resizewidth : int, default=30
+        The width to which frames are resized (aspect ratio is maintained).
+
+    max_iter : int, default=100
+        Maximum number of iterations for the Gaussian Mixture Model.
+
+    color : bool, default=False
+        Whether to include color information in clustering.
+
+    Returns
+    -------
+    frames2pick : list
+        List of selected frame indices.
+    """
+    print(
+        "GMM-based extracting of frames from",
+        round(start * clip.duration, 2),
+        "seconds to",
+        round(stop * clip.duration, 2),
+        "seconds.",
+    )
+    startindex = int(np.floor(clip.fps * clip.duration * start))
+    stopindex = int(np.ceil(clip.fps * clip.duration * stop))
+
+    if Index is None:
+        Index = np.arange(startindex, stopindex, step)
+    else:
+        Index = np.array(Index)
+        Index = Index[(Index >= startindex) & (Index <= stopindex)]  # Crop to range
+
+    nframes = len(Index)
+    if nframes < numframes2pick:
+        print("Not enough frames to pick from. Returning all available frames.")
+        return list(Index)
+
+    clipresized = clip.resize(width=resizewidth)
+    ny, nx = clipresized.size
+    frame0 = img_as_ubyte(clip.get_frame(0))
+    ncolors = frame0.shape[2] if frame0.ndim == 3 else 1
+
+    print("Extracting and downsampling...", nframes, "frames from the video.")
+
+    # Initialize data array
+    if color and ncolors > 1:
+        DATA = np.zeros((nframes, nx * ny * 3), dtype=np.uint8)
+    else:
+        DATA = np.zeros((nframes, nx * ny), dtype=np.uint8)
+
+    for counter, index in tqdm(enumerate(Index), total=nframes):
+        frame_time = index / clip.fps
+        frame = img_as_ubyte(clipresized.get_frame(frame_time))
+        if color and ncolors > 1:
+            DATA[counter, :] = frame.reshape(-1)
+        else:
+            if ncolors == 1:
+                gray_frame = frame
+            else:
+                gray_frame = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)
+            DATA[counter, :] = gray_frame.flatten()
+
+    print("Fitting Gaussian Mixture Model... (this might take a while)")
+    gmm = GaussianMixture(
+        n_components=numframes2pick, max_iter=max_iter, random_state=42
+    )
+    gmm.fit(DATA)
+
+    labels = gmm.predict(DATA)
+    frames2pick = []
+    for clusterid in range(numframes2pick):
+        cluster_indices = np.where(labels == clusterid)[0]
+        if len(cluster_indices) > 0:
+            selected_index = np.random.choice(cluster_indices)
+            frames2pick.append(Index[selected_index])
+
+    clipresized.close()
+    del clipresized
+    return frames2pick
+
+def GMMbasedFrameselectioncv2(
+    cap,
+    numframes2pick,
+    start,
+    stop,
+    Index=None,
+    step=1,
+    resizewidth=30,
+    max_iter=100,
+    color=False,
+):
+    """
+    This function selects frames from a video capture object using Gaussian Mixture Model clustering.
+    Each frame is treated as a data point, and frames from different clusters are selected.
+
+    Parameters
+    ----------
+    cap : VideoCapture object
+        The OpenCV video capture object.
+
+    numframes2pick : int
+        The number of frames to select.
+
+    start : float
+        The starting fraction of the video duration (between 0 and 1).
+
+    stop : float
+        The ending fraction of the video duration (between 0 and 1).
+
+    Index : list or ndarray, optional
+        A list of frame indices to consider. If None, frames are sampled based on start and stop.
+
+    step : int, default=1
+        Step size for sampling frames.
+
+    resizewidth : int, default=30
+        The width to which frames are resized (aspect ratio is maintained).
+
+    max_iter : int, default=100
+        Maximum number of iterations for the Gaussian Mixture Model.
+
+    color : bool, default=False
+        Whether to include color information in clustering.
+
+    Returns
+    -------
+    frames2pick : list
+        List of selected frame indices.
+    """
+    nframes = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+    fps = cap.get(cv2.CAP_PROP_FPS)
+    width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+    height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    ratio = resizewidth / width
+    if ratio > 1:
+        raise ValueError("resizewidth is larger than original frame width.")
+
+    print(
+        "GMM-based extracting of frames from",
+        round(start * nframes / fps, 2),
+        "seconds to",
+        round(stop * nframes / fps, 2),
+        "seconds.",
+    )
+    startindex = int(np.floor(nframes * start))
+    stopindex = int(np.ceil(nframes * stop))
+
+    if Index is None:
+        Index = np.arange(startindex, stopindex, step)
+    else:
+        Index = np.array(Index)
+        Index = Index[(Index >= startindex) & (Index <= stopindex)]  # Crop to range
+
+    nframes = len(Index)
+    if nframes < numframes2pick:
+        print("Not enough frames to pick from. Returning all available frames.")
+        return list(Index)
+
+    ny = int(height * ratio)
+    nx = int(width * ratio)
+
+    # Initialize data array
+    if color:
+        DATA = np.zeros((nframes, ny * nx * 3), dtype=np.uint8)
+    else:
+        DATA = np.zeros((nframes, ny * nx), dtype=np.uint8)
+
+    print("Extracting and downsampling...", nframes, "frames from the video.")
+
+    for counter, idx in tqdm(enumerate(Index), total=nframes):
+        cap.set(cv2.CAP_PROP_POS_FRAMES, idx)
+        ret, frame = cap.read()
+        if not ret:
+            continue
+        frame_resized = cv2.resize(
+            frame, (nx, ny), interpolation=cv2.INTER_AREA
+        )
+        if color:
+            DATA[counter, :] = frame_resized.reshape(-1)
+        else:
+            gray_frame = cv2.cvtColor(frame_resized, cv2.COLOR_BGR2GRAY)
+            DATA[counter, :] = gray_frame.flatten()
+
+    print("Fitting Gaussian Mixture Model... (this might take a while)")
+    gmm = GaussianMixture(
+        n_components=numframes2pick, max_iter=max_iter, random_state=42
+    )
+    gmm.fit(DATA)
+
+    labels = gmm.predict(DATA)
+    frames2pick = []
+    for clusterid in range(numframes2pick):
+        cluster_indices = np.where(labels == clusterid)[0]
+        if len(cluster_indices) > 0:
+            selected_index = np.random.choice(cluster_indices)
+            frames2pick.append(Index[selected_index])
+
+    return frames2pick
+
+def EMFrameSelection(
+    cap,
+    numframes2pick,
+    start,
+    stop,
+    Index=None,
+    step=1,
+    resizewidth=30,
+    max_iter=100,
+    cov_mat_type=cv2.ml.EM_COV_MAT_DIAGONAL,
+    color=False,
+):
+    """
+    This function selects frames from a video capture object using the EM algorithm for Gaussian Mixture Models.
+    Each frame is treated as a data point, and frames from different clusters are selected.
+
+    Parameters
+    ----------
+    cap : cv2.VideoCapture object
+        The OpenCV video capture object.
+
+    numframes2pick : int
+        The number of frames to select.
+
+    start : float
+        The starting fraction of the video duration (between 0 and 1).
+
+    stop : float
+        The ending fraction of the video duration (between 0 and 1).
+
+    Index : list or ndarray, optional
+        A list of frame indices to consider. If None, frames are sampled based on start and stop.
+
+    step : int, default=1
+        Step size for sampling frames.
+
+    resizewidth : int, default=30
+        The width to which frames are resized (aspect ratio is maintained).
+
+    max_iter : int, default=100
+        Maximum number of iterations for the EM algorithm.
+
+    cov_mat_type : int, default=cv2.ml.EM_COV_MAT_DIAGONAL
+        Type of the covariance matrices for the GMM components.
+        Options include cv2.ml.EM_COV_MAT_SPHERICAL, cv2.ml.EM_COV_MAT_DIAGONAL, cv2.ml.EM_COV_MAT_GENERIC.
+
+    color : bool, default=False
+        Whether to include color information in clustering.
+
+    Returns
+    -------
+    frames2pick : list
+        List of selected frame indices.
+    """
+    nframes = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+    fps = cap.get(cv2.CAP_PROP_FPS)
+    width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+    height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    ratio = resizewidth / width
+    if ratio > 1:
+        raise ValueError("resizewidth is larger than original frame width.")
+
+    print(
+        "EM-based extracting of frames from",
+        round(start * nframes / fps, 2),
+        "seconds to",
+        round(stop * nframes / fps, 2),
+        "seconds.",
+    )
+    startindex = int(np.floor(nframes * start))
+    stopindex = int(np.ceil(nframes * stop))
+
+    if Index is None:
+        Index = np.arange(startindex, stopindex, step)
+    else:
+        Index = np.array(Index)
+        Index = Index[(Index >= startindex) & (Index <= stopindex)]  # Crop to range
+
+    nframes = len(Index)
+    if nframes < numframes2pick:
+        print("Not enough frames to pick from. Returning all available frames.")
+        return list(Index)
+
+    ny = int(height * ratio)
+    nx = int(width * ratio)
+
+    if color:
+        DATA = np.zeros((nframes, ny * nx * 3), dtype=np.float32)
+    else:
+        DATA = np.zeros((nframes, ny * nx), dtype=np.float32)
+
+    print("Extracting and downsampling...", nframes, "frames from the video.")
+
+    for counter, idx in tqdm(enumerate(Index), total=nframes):
+        cap.set(cv2.CAP_PROP_POS_FRAMES, idx)
+        ret, frame = cap.read()
+        if not ret:
+            continue
+        frame_resized = cv2.resize(
+            frame, (nx, ny), interpolation=cv2.INTER_AREA
+        )
+        if color:
+            DATA[counter, :] = frame_resized.flatten()
+        else:
+            gray_frame = cv2.cvtColor(frame_resized, cv2.COLOR_BGR2GRAY)
+            DATA[counter, :] = gray_frame.flatten()
+
+    # Normalize data
+    DATA -= np.mean(DATA, axis=0)
+
+    print("Fitting EM Gaussian Mixture Model... (this might take a while)")
+
+    # Initialize EM model
+    em = cv2.ml.EM_create()
+    em.setClustersNumber(numframes2pick)
+    em.setCovarianceMatrixType(cov_mat_type)
+    em.setTermCriteria((cv2.TERM_CRITERIA_MAX_ITER + cv2.TERM_CRITERIA_EPS, max_iter, 1e-6))
+
+    # Train EM model
+    retval, logLikelihoods, labels, probs = em.trainEM(DATA)
+
+    labels = labels.flatten().astype(int)
+    frames2pick = []
+    for clusterid in range(numframes2pick):
+        cluster_indices = np.where(labels == clusterid)[0]
+        if len(cluster_indices) > 0:
+            selected_index = np.random.choice(cluster_indices)
+            frames2pick.append(Index[selected_index])
+
+    return frames2pick
 
 def UniformFrames(clip, numframes2pick, start, stop, Index=None):
     """Temporally uniformly sampling frames in interval (start,stop).
